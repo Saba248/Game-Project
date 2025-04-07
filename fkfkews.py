@@ -1,17 +1,47 @@
 from pygame import *
 from random import randint
+#NCT_127-Orange_Seoul_Instrumental
 
 init()
 
-width = 1000
-height = 700
+mixer.init()
+print("Choose between: ")
+print("1. NCT127- Orange Seoul,")
+print("2. Aespa- Drama,")
+print("3. Eve- Kaikai Kitan.")
+music_choice = int(input(">>>"))
+if music_choice == 1:
+    music = "NCT_127-Orange_Seoul_Instrumental.mp3"
+    exitProg = False
+elif music_choice == 2:
+    music = "aespa-Drama_Instrumental.mp3"
+    exitProg = False
+elif music_choice == 3:
+    music = "Kaikai_Kitan-Eve_Instrumental.mp3"
+    exitProg = False
+
+mixer.music.load(music)
+mixer.music.set_volume(0.3)
+mixer.music.play(-1)
+
+
+width = 700
+height = 600
 window = display.set_mode((width, height))
 display.set_caption("Pac-Man")
 screen = display.get_surface()
 
-walls = [Rect(0,0,1000,6), Rect(0,694,1000,6),  #horizontal
-         Rect(0,0,6,300), Rect(994,0,6,300),  #vertical top
-         Rect(0,400,6,300), Rect(994,400,6,300),  #vertical bottom
+ghost_change_timer = 0
+
+pointTotal = 0
+maxPoints = 880
+
+deathTotal = 0
+maxDeaths = 4
+
+walls = [Rect(0,0,700,6), Rect(0,594,700,6),  #horizontal
+         Rect(0,0,6,250), Rect(694,0,6,250),  #vertical top
+         Rect(0,350,6,250), Rect(694,350,6,250),  #vertical bottom
 
          Rect(80,70,220,2), Rect(80,70,2,195),  #top left corner(1.1)
          Rect(95,85,205,2), Rect(95,85,2,180),  #top corner(1.2)
@@ -22,35 +52,48 @@ walls = [Rect(0,0,1000,6), Rect(0,694,1000,6),  #horizontal
          Rect(150,140,2,80), Rect(230,140,2,82),  #top left corner(2.2.1)
          Rect(165,155,2,50), Rect(215,155,2,52),  #top left corner(2.2.1)
 
-         Rect(700,70,220,2), Rect(920,70,2,196),  #top right corner(1.1)
-         Rect(700,85,205,2), Rect(905,85,2,180),  #top right corner(1.2)
-         Rect(700,70,2,17), Rect(905,265,17,2),  #top right corner(1.2)
+         Rect(400,70,220,2), Rect(620,70,2,196),  #top right corner(1.1)
+         Rect(400,85,205,2), Rect(605,85,2,180),  #top right corner(1.2)
+         Rect(400,70,2,17), Rect(605,265,17,2),  #top right corner(1.2)
 
-         Rect(770, 140, 80, 2), Rect(770, 220, 80, 2),  # top right corner(2.1.1)
-         Rect(785, 155, 50, 2), Rect(785, 205, 50, 2),  # top right corner(2.1.1)
-         Rect(770, 140, 2, 80), Rect(850, 140, 2, 82),  # top right corner(2.2.1)
-         Rect(785, 155, 2, 50), Rect(835, 155, 2, 52),  # top right corner(2.2.1)
+         Rect(470, 140, 80, 2), Rect(470, 220, 80, 2),  # top right corner(2.1.1)
+         Rect(485, 155, 50, 2), Rect(485, 205, 50, 2),  # top right corner(2.1.1)
+         Rect(470, 140, 2, 80), Rect(550, 140, 2, 82),  # top right corner(2.2.1)
+         Rect(485, 155, 2, 50), Rect(535, 155, 2, 52),  # top right corner(2.2.1)
 
-         Rect(80, 630, 220, 2), Rect(80, 435, 2, 195),  # bottom left corner(1.1)
-         Rect(95, 615, 205, 2), Rect(95, 435, 2, 180),  # bottom corner(1.2)
-         Rect(300, 615, 2, 17), Rect(80, 435, 17, 2),  # bottom corner(1.2)
+         Rect(80, 530, 220, 2), Rect(80, 335, 2, 195),  # bottom left corner(1.1)
+         Rect(95, 515, 205, 2), Rect(95, 335, 2, 180),  # bottom corner(1.2)
+         Rect(300, 515, 2, 17), Rect(80, 335, 17, 2),  # bottom corner(1.2)
 
-         Rect(150, 480, 80, 2), Rect(150, 560, 80, 2),  # bottom left corner(2.1.1)
-         Rect(165, 495, 50, 2), Rect(165, 545, 50, 2),  # bottom left corner(2.1.1)
-         Rect(150, 480, 2, 80), Rect(230, 480, 2, 82),  # bottom left corner(2.2.1)
-         Rect(165, 495, 2, 50), Rect(215, 495, 2, 52),  # bottom left corner(2.2.1)
+         Rect(150, 380, 80, 2), Rect(150, 460, 80, 2),  # bottom left corner(2.1.1)
+         Rect(165, 395, 50, 2), Rect(165, 445, 50, 2),  # bottom left corner(2.1.1)
+         Rect(150, 380, 2, 80), Rect(230, 380, 2, 82),  # bottom left corner(2.2.1)
+         Rect(165, 395, 2, 50), Rect(215, 395, 2, 52),  # bottom left corner(2.2.1)
 
-         Rect(700, 630, 220, 2), Rect(920, 435, 2, 196),  # bottom right corner(1.1)
-         Rect(700, 615, 206, 2), Rect(905, 435, 2, 180),  # bottom right corner(1.2)
-         Rect(700, 615, 2, 17), Rect(905, 435, 17, 2),  # bottom right corner(1.2)
+         Rect(400, 530, 220, 2), Rect(620, 335, 2, 196),  # bottom right corner(1.1)
+         Rect(400, 515, 206, 2), Rect(605, 335, 2, 180),  # bottom right corner(1.2)
+         Rect(400, 515, 2, 17), Rect(605, 335, 17, 2),  # bottom right corner(1.2)
 
-         Rect(770, 480, 80, 2), Rect(770, 560, 80, 2),  # bottom right corner(2.1.1)
-         Rect(785, 495, 50, 2), Rect(785, 545, 50, 2),  # bottom right corner(2.1.1)
-         Rect(770, 480, 2, 80), Rect(850, 480, 2, 82),  # bottom right corner(2.2.1)
-         Rect(785, 495, 2, 50), Rect(835, 495, 2, 52),  # bottom right corner(2.2.1)
-
+         Rect(470, 380, 80, 2), Rect(470, 460, 80, 2),  # bottom right corner(2.1.1)
+         Rect(485, 395, 50, 2), Rect(485, 445, 50, 2),  # bottom right corner(2.1.1)
+         Rect(470, 380, 2, 80), Rect(550, 380, 2, 82),  # bottom right corner(2.2.1)
+         Rect(485, 395, 2, 50), Rect(535, 395, 2, 52),  # bottom right corner(2.2.1)
          ]
+points = [Rect(32,30,16,16), Rect(32,104,16,16), Rect(32,178,16,16), Rect(32,252,16,16),
+          Rect(32,326,16,16), Rect(32,400,16,16), Rect(32,474,16,16), Rect(32,548,16,16),
+          Rect(652, 30, 16, 16), Rect(652, 104, 16, 16), Rect(652, 178, 16, 16), Rect(652, 252, 16, 16),
+          Rect(652, 326, 16, 16), Rect(652, 400, 16, 16), Rect(652, 474, 16, 16), Rect(652, 548, 16, 16),
 
+          Rect(122,30,16,16), Rect(212,30,16,16), Rect(302,30,16,16),
+          Rect(392,30,16,16), Rect(482,30,16,16), Rect(572,30,16,16),
+          Rect(122, 548, 16, 16), Rect(212, 548, 16, 16), Rect(302, 548, 16, 16),
+          Rect(392, 548, 16, 16), Rect(482, 548, 16, 16), Rect(572, 548, 16, 16),
+
+          Rect(32,30,16,16), Rect(32,104,16,16), Rect(32,178,16,16), Rect(32,252,16,16),
+          Rect(32,326,16,16), Rect(32,400,16,16), Rect(32,474,16,16), Rect(32,548,16,16),
+          Rect(652, 30, 16, 16), Rect(652, 104, 16, 16), Rect(652, 178, 16, 16), Rect(652, 252, 16, 16),
+          Rect(652, 326, 16, 16), Rect(652, 400, 16, 16), Rect(652, 474, 16, 16), Rect(652, 548, 16, 16)
+          ]
 #Characters
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
@@ -65,12 +108,11 @@ PGhostImg = image.load("pinkGhost.png")
 PGhostImg = transform.scale(PGhostImg, (30, 40))
 OGhostImg = image.load("orangeGhost.png")
 OGhostImg = transform.scale(OGhostImg, (30, 40))
-Pacman = Rect(450, 350, 40, 40)
-RGhost = Rect(300, 350, 30, 40)
-BGhost = Rect(400, 350, 30, 40)
-PGhost = Rect(500, 350, 30, 40)
-OGhost = Rect(200, 350, 30, 40)
-exitProg = False
+Pacman = Rect(400, 200, 40, 40)
+RGhost = Rect(400, 330, 30, 40)
+BGhost = Rect(450, 330, 30, 40)
+PGhost = Rect(500, 330, 30, 40)
+OGhost = Rect(550, 330, 30, 40)
 
 # Game loop
 px=0
@@ -89,6 +131,8 @@ while exitProg == False:
     screen.fill((100, 100, 100))
     for wall in walls:
         draw.rect(screen, BLUE, wall)
+    for point in points:
+        draw.rect(screen, YELLOW, point)
     for e in event.get():
         if e.type == QUIT:
             exitProg = True
@@ -107,24 +151,27 @@ while exitProg == False:
             elif e.key == K_UP or e.key == K_DOWN:
                 py = 0
 
-    grx = randint(-1,1)
-    gry = randint(-1,1)
-    gbx = randint(-1,1)
-    gby = randint(-1,1)
-    gpx = randint(-1,1)
-    gpy = randint(-1,1)
-    gox = randint(-1,1)
-    goy = randint(-1,1)
+    ghost_change_timer += 1
+    if ghost_change_timer > 30:
+        ghost_change_timer = 0
+        grx = randint(-1,1)
+        gry = randint(-1,1)
+        gbx = randint(-1,1)
+        gby = randint(-1,1)
+        gpx = randint(-1,1)
+        gpy = randint(-1,1)
+        gox = randint(-1,1)
+        goy = randint(-1,1)
 
 
     if Pacman.x + px <= 0:
         px = 0
-        if py <= 300 or py >= 400:
-            Pacman.x = 953
+        if py <= 350 or py >= 250:
+            Pacman.x = 654
             px = 0
     if Pacman.x + px >= width - 45:
         px = 0
-        if py <= 300 or py >= 400:
+        if py <= 250 or py >= 350:
             Pacman.x = 0
             px = 1
     if Pacman.y + py <= 0:
@@ -198,14 +245,23 @@ while exitProg == False:
     if OGhost.y + goy >= height -45:
         goy = 0
 
-    #if Pacman.colliderect(RGhost):
-    #    exitProg = True
-    #if Pacman.colliderect(BGhost):
-    #    exitProg = True
-    #if Pacman.colliderect(PGhost):
-    #    exitProg = True
-    #if Pacman.colliderect(OGhost):
-    #    exitProg = True
+    if Pacman.colliderect(RGhost):
+        Pacman.x, Pacman.y = 20, 20
+        deathTotal = deathTotal + 1
+        print(deathTotal)
+    if Pacman.colliderect(BGhost):
+        Pacman.x, Pacman.y = 20, 20
+        deathTotal = deathTotal + 1
+        print(deathTotal)
+    if Pacman.colliderect(PGhost):
+        Pacman.x, Pacman.y = 20, 20
+        deathTotal = deathTotal + 1
+        print(deathTotal)
+    if Pacman.colliderect(OGhost):
+        Pacman.x, Pacman.y = 20, 20
+        deathTotal = deathTotal + 1
+        print(deathTotal)
+
 
     next_pos_PAC_x = Pacman.move(px, 0)
     next_pos_PAC_y = Pacman.move(0, py)
@@ -257,6 +313,13 @@ while exitProg == False:
             goy = 0
             break
 
+    for point in points:
+        if next_pos_PAC_x.colliderect(point):
+            points.remove(point)
+            pointTotal = pointTotal + 20
+            print (pointTotal)
+
+
 
     Pacman.move_ip(px, py)
     screen.blit(PacmanImg, Pacman)
@@ -268,6 +331,14 @@ while exitProg == False:
     screen.blit(PGhostImg, PGhost)
     OGhost.move_ip(gox, goy)
     screen.blit(OGhostImg, OGhost)
+
+    if maxPoints == pointTotal:
+        exitProg = True
+        print("You Win!!!")
+
+    if maxDeaths == deathTotal:
+        exitProg = True
+        print("You lost:(")
 
     display.flip()
 
