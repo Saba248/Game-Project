@@ -1,5 +1,6 @@
 from pygame import *
 from random import randint
+from tkinter import *
 #NCT_127-Orange_Seoul_Instrumental
 
 init()
@@ -26,15 +27,16 @@ mixer.music.play(-1)
 
 
 width = 700
-height = 600
+height = 680
 window = display.set_mode((width, height))
 display.set_caption("Pac-Man")
 screen = display.get_surface()
+font = font.SysFont("Arial", 32)
 
 ghost_change_timer = 0
 
 pointTotal = 0
-maxPoints = 880
+maxPoints = 560
 
 deathTotal = 0
 maxDeaths = 4
@@ -87,12 +89,7 @@ points = [Rect(32,30,16,16), Rect(32,104,16,16), Rect(32,178,16,16), Rect(32,252
           Rect(122,30,16,16), Rect(212,30,16,16), Rect(302,30,16,16),
           Rect(392,30,16,16), Rect(482,30,16,16), Rect(572,30,16,16),
           Rect(122, 548, 16, 16), Rect(212, 548, 16, 16), Rect(302, 548, 16, 16),
-          Rect(392, 548, 16, 16), Rect(482, 548, 16, 16), Rect(572, 548, 16, 16),
-
-          Rect(32,30,16,16), Rect(32,104,16,16), Rect(32,178,16,16), Rect(32,252,16,16),
-          Rect(32,326,16,16), Rect(32,400,16,16), Rect(32,474,16,16), Rect(32,548,16,16),
-          Rect(652, 30, 16, 16), Rect(652, 104, 16, 16), Rect(652, 178, 16, 16), Rect(652, 252, 16, 16),
-          Rect(652, 326, 16, 16), Rect(652, 400, 16, 16), Rect(652, 474, 16, 16), Rect(652, 548, 16, 16)
+          Rect(392, 548, 16, 16), Rect(482, 548, 16, 16), Rect(572, 548, 16, 16)
           ]
 #Characters
 BLUE = (0, 0, 255)
@@ -128,7 +125,7 @@ goy=0
 directions = [-1, 0, 1]
 while exitProg == False:
     time.delay(5)
-    screen.fill((100, 100, 100))
+    screen.fill((0, 0, 0))
     for wall in walls:
         draw.rect(screen, BLUE, wall)
     for point in points:
@@ -248,19 +245,15 @@ while exitProg == False:
     if Pacman.colliderect(RGhost):
         Pacman.x, Pacman.y = 20, 20
         deathTotal = deathTotal + 1
-        print(deathTotal)
     if Pacman.colliderect(BGhost):
         Pacman.x, Pacman.y = 20, 20
         deathTotal = deathTotal + 1
-        print(deathTotal)
     if Pacman.colliderect(PGhost):
         Pacman.x, Pacman.y = 20, 20
         deathTotal = deathTotal + 1
-        print(deathTotal)
     if Pacman.colliderect(OGhost):
         Pacman.x, Pacman.y = 20, 20
         deathTotal = deathTotal + 1
-        print(deathTotal)
 
 
     next_pos_PAC_x = Pacman.move(px, 0)
@@ -317,8 +310,27 @@ while exitProg == False:
         if next_pos_PAC_x.colliderect(point):
             points.remove(point)
             pointTotal = pointTotal + 20
-            print (pointTotal)
 
+
+
+    score_label = font.render(f"Score: {pointTotal}", True, (255, 255, 255))
+    deaths_label = font.render(f"Deaths: {deathTotal}", True, (255, 0, 0))
+
+    screen.blit(score_label, (20, 620))
+    screen.blit(deaths_label, (500, 620))
+    if maxPoints == pointTotal or maxDeaths == deathTotal:
+        exitProg = True
+        outcomeWindow = Tk()
+        outcomeWindow.geometry("380x350")
+        outcomeWindow.title("Outcome")  # title of window
+        outcomeWindow.config(background="#e0ffcc")
+        if maxPoints == pointTotal:
+            message = "YOU WIN!!!   ;)"
+        if maxDeaths == deathTotal:
+            message = "You Lost  :("
+
+        Label(outcomeWindow, text=message, font=('Arial', 24, 'bold'), bg="#e0ffcc", fg="#8d32a8").pack(pady=120)
+        outcomeWindow.mainloop()
 
 
     Pacman.move_ip(px, py)
@@ -332,13 +344,6 @@ while exitProg == False:
     OGhost.move_ip(gox, goy)
     screen.blit(OGhostImg, OGhost)
 
-    if maxPoints == pointTotal:
-        exitProg = True
-        print("You Win!!!")
-
-    if maxDeaths == deathTotal:
-        exitProg = True
-        print("You lost:(")
 
     display.flip()
 
